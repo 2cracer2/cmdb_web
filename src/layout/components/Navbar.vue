@@ -16,14 +16,12 @@
               主页
             </el-dropdown-item>
           </router-link>
-          <a target="_blank" href="https://123.moresec.cn/">
-            <el-dropdown-item>返回PMP</el-dropdown-item>
+          <a target="_blank" href="http://localhost:8000/admin">
+            <el-dropdown-item>Django后台</el-dropdown-item>
           </a>
-          <a target="_blank" href="https://github.com/PanJiaChen/vue-admin-template/">
-            <el-dropdown-item>Github</el-dropdown-item>
-          </a>
-          <a target="_blank" href="http://localhost:8000/docs">
-            <el-dropdown-item>Docs</el-dropdown-item>
+
+          <a target="_blank" href="http://localhost:8000/api">
+            <el-dropdown-item>APi文档</el-dropdown-item>
           </a>
           <el-dropdown-item divided @click.native="logout">
             <span style="display:block;">退出</span>
