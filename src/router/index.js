@@ -101,7 +101,7 @@ export const asyncRoutes = [
     redirect: '/nested/menu1',
     name: 'Nested',
     meta: {
-      title: 'Nested',
+      title: '服务管理',
       icon: 'nested'
     },
     children: [
@@ -158,8 +158,8 @@ export const asyncRoutes = [
     component: Layout,
     children: [
       {
-        path: 'https://panjiachen.github.io/vue-element-admin-site/#/',
-        meta: { title: 'External Link', icon: 'link' }
+        path: 'http://127.0.0.1:8000/admin/',
+        meta: { title: 'Django 后台', icon: 'link' }
       }
     ]
   },

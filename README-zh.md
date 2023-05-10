@@ -101,6 +101,6 @@ Modern browsers and Internet Explorer 10+.
 
 Copyright (c) 2017-present PanJiaChen
 
-
+git remote add origin git@github.com:UserName/projectName.git
 
 git push -u origin master
