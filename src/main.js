@@ -33,6 +33,12 @@ Vue.use(ElementUI, { locale })
 // 如果想要中文版 element-ui，按如下方式声明
 // Vue.use(ElementUI)
 
+import VueNativeSock from 'vue-native-websocket'
+
+Vue.use(VueNativeSock, 'ws://localhost:8000/ws/ssh/', {
+  format: 'json'
+})
+
 Vue.config.productionTip = false
 
 new Vue({
