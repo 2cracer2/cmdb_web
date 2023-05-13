@@ -1,71 +1,101 @@
 <template>
-  <div>
-    <input v-model="ip" placeholder="Enter IP">
-    <button @click="connect">Connect</button>
-    <button @click="disconnect">Disconnect</button>
-    <div ref="terminal" class="terminal"></div>
-  </div>
+  <div ref="xterm" class="terminal" :style="styleVar" />
 </template>
-
+ 
 <script>
-import { Terminal } from 'xterm'
 import 'xterm/css/xterm.css'
-
+import { Terminal } from 'xterm'
+import { FitAddon } from 'xterm-addon-fit'
+ 
 export default {
+  name: 'xterm',
+  props: {
+    ip: { type: String },   // 通过父组件传递登录ip
+    height: {
+      type: Number,  // xterm显示屏幕，高度
+      default: 100,
+    },
+  },
   data() {
     return {
       term: null,
       socket: null,
-      ip: '',
     }
   },
+  computed: {   // 动态设置xterm显示屏幕高度
+    styleVar() {
+      return {
+        '--terminal-height': this.height + "vh"
+      }
+    }
+  },
+  mounted() {  // 初始化链接
+    this.init()
+    this.initSocket()
+  },
+  beforeDestroy() {  // 退出销毁链接
+    this.socket.close()
+    this.term.dispose()
+  },
   methods: {
-    connect() {
-      this.initTerm()
-      this.initSocket()
-    },
-    disconnect() {
-      if (this.socket) {
-        this.socket.close()
-        this.socket = null
-      }
-      if (this.term) {
-        this.term.dispose()
-        this.term = null
-      }
-    },
-    initTerm() {
-      this.term = new Terminal()
-      this.term.open(this.$refs.terminal)
-      this.term.onData(data => {
-        if (this.socket) {
-          this.socket.send(JSON.stringify({ command: data }))
+    init() {  // 初始化Terminal
+      this.term = new Terminal({
+        fontSize: 18,
+        convertEol: true, // 启用时，光标将设置为下一行的开头
+        rendererType: 'canvas', // 渲染类型
+        cursorBlink: true, // 光标闪烁
+        cursorStyle: 'bar', // 光标样式 underline
+        theme: {
+          background: '#060101', // 背景色
+          cursor: 'help' // 设置光标
         }
       })
     },
-    initSocket() {
-      this.socket = new WebSocket(`ws://127.0.0.1:8000/ws/ssh/${this.ip}`)
+    initSocket() {  // 初始化Websocket
+      const fitPlugin = new FitAddon()
+      this.term.loadAddon(fitPlugin)
+      this.socket = new WebSocket(`ws://127.0.0.1:8000/ws/ssh/192.168.1.151`)
+ 
+      this.socket.onmessage = e => {
+        const reader = new window.FileReader()
+        reader.onload = () => this.term.write(reader.result)
+        reader.readAsText(e.data, 'utf-8')
+      }
+ 
       this.socket.onopen = () => {
-        console.log('WebSocket connected')
+        this.term.open(this.$refs.xterm)
+        this.term.focus()
+        fitPlugin.fit()
       }
-      this.socket.onclose = () => {
-        console.log('WebSocket disconnected')
+ 
+      this.socket.onclose = e => {
+        if (e.code === 1234) {  // 结束标记
+          window.location.href = 'about:blank'
+          window.close()
+        } else {
+          setTimeout(() => this.term.write('\r\nConnection is closed.\r\n'), 200)
+        }
       }
-      this.socket.onerror = error => {
-        console.error(`WebSocket error: ${error}`)
-      }
-      this.socket.onmessage = event => {
-        const data = JSON.parse(event.data)
-        this.term.write(data.message)
-      }
+ 
+      this.term.onData(data => this.socket.send(JSON.stringify({ data })))
+      this.term.onResize(({ cols, rows }) => {
+        this.socket.send(JSON.stringify({ resize: [cols, rows] }))
+      })
+ 
+      window.onresize = () => fitPlugin.fit()
     }
   }
 }
 </script>
-
-<style scoped>
+<style lang="scss" scoped>
 .terminal {
+  display: flex;
   width: 100%;
-  height: 500px;
+  min-height: var(--terminal-height);
+  flex: 1;
+  background-color: #000;
+}
+.terminal > div {
+  flex: 1;
 }
 </style>
