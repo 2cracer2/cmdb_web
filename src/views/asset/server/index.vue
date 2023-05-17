@@ -8,32 +8,32 @@
       </el-col>
       <el-col :span="3">
         <div class="grid-content bg-purple">
-          <el-select v-model="params.os_type" clearable size="small" placeholder="操作系统" @change="handleFilter">
-            <el-option v-for="(item,index) in osList" :key="index" :label="item.os_type" :value="item.os_type" />
+          <el-select v-model="params.os_release" clearable size="small" placeholder="操作系统" @change="handleFilter">
+            <el-option v-for="(item, index) in osList" :key="index" :label="item" :value="item" />
           </el-select>
         </div>
       </el-col>
       <el-col :span="6">
         <div class="grid-content bg-purple">
-          <el-input v-model="params.keywords" size="small" clearable placeholder="IP、SN、Hostname" class="input-with-select" @keyup.enter.native="handleFilter">
+          <el-input v-model="params.keywords" size="small" clearable placeholder="IP、SN、Hostname"
+            class="input-with-select" @keyup.enter.native="handleFilter" @clear="resetTable">
             <el-button slot="append" icon="el-icon-search" @click="handleFilter"></el-button>
           </el-input>
         </div>
       </el-col>
-      <el-col :span="3"><div class="grid-content bg-purple"></div></el-col>
+      <el-col :span="3">
+        <div class="grid-content bg-purple"></div>
+      </el-col>
     </el-row>
-    <server-list ref="serverListTable" :values="server" @mulselect="handleSelectionChange" @edit="handleDialogUpdate" @delete="handleDeleteServer"></server-list>
-    <el-dialog
-      :visible.sync="dialogVisibleCreate"
-      title="新增服务器"
-      width="40%">
-      <server-form ref="serverCreateForm" :soption="supplierOption" :ioption="idcList" :bname="createString" @submit="handleSubmitCreate" @cancel="handleCreateCancel"></server-form>
+    <server-list ref="serverListTable" :values="server" @mulselect="handleSelectionChange" @edit="handleDialogUpdate"
+      @delete="handleDeleteServer"></server-list>
+    <el-dialog :visible.sync="dialogVisibleCreate" title="新增服务器" width="40%">
+      <server-form ref="serverCreateForm" :soption="supplierOption" :ioption="idcList" :bname="createString"
+        @submit="handleSubmitCreate" @cancel="handleCreateCancel"></server-form>
     </el-dialog>
-    <el-dialog
-      :visible.sync="dialogVisibleUpdate"
-      title="修改服务器信息"
-      width="40%">
-      <server-form ref="serverUpdateForm" :form="detailForm" :uarray="uList" :soption="supplierOption" :iarray="idcArray" :ioption="idcList" :bname="updateString" @submit="handleSubmitUpdate" @cancel="handleUpdateCancel"></server-form>
+    <el-dialog :visible.sync="dialogVisibleUpdate" title="修改服务器信息" width="40%">
+      <server-form ref="serverUpdateForm" :form="detailForm" :uarray="uList" :soption="supplierOption" :iarray="idcArray"
+        :ioption="idcList" :bname="updateString" @submit="handleSubmitUpdate" @cancel="handleUpdateCancel"></server-form>
     </el-dialog>
     <el-row class="bottom-class">
       <el-col :span="1">
@@ -48,12 +48,8 @@
       </el-col>
       <el-col :span="8" :offset="6">
         <div class="pagination">
-          <el-pagination
-            :current-page="currentPage1"
-            :page-sizes="[10, 20, 100, 200]"
-            :total="totalNum"
-            layout="total, sizes, prev, pager, next, jumper"
-            @size-change="handleSizeChange"
+          <el-pagination :current-page="currentPage1" :page-sizes="[10, 20, 100, 200]" :total="totalNum"
+            layout="total, sizes, prev, pager, next, jumper" @size-change="handleSizeChange"
             @current-change="handleCurrentChange">
           </el-pagination>
         </div>
@@ -96,7 +92,7 @@ export default {
         page: 1,
         keywords: '',
         page_size: 10,
-        os_type: ''
+        os_release: ''
       }
     }
   },
@@ -110,7 +106,9 @@ export default {
         res => {
           this.server = res.data.results
           this.totalNum = res.data.count
-          this.osList = res.data.results.filter(item => item.os_type)
+          // this.osList = [...new Set(res.data.results.filter(item => item.os_release).map(item => item.os))]
+          this.osList = [...new Set(res.data.results.map(item => item.os_release))]
+          console.log(this.osList)
         },
         err => {
           this.$message({
@@ -120,6 +118,14 @@ export default {
         }
       )
     },
+    resetTable() {
+    // 输入框的内容被清空时，表单恢复成默认状态
+    this.params.page = 1;
+    this.params.keywords = '';
+    this.params.page_size = 10;
+    this.params.os_release = '';
+    this.fetchData();  // reload the table
+  },
     handleSubmitCreate(value) {
       // 创建服务器
       createServer(value).then(
@@ -264,24 +270,29 @@ export default {
   padding: 10px;
   margin-top: 10px;
 }
-  .el-col {
-    border-radius: 4px;
-  }
-  .grid-content {
-    border-radius: 4px;
-    min-height: 36px;
-  }
+
+.el-col {
+  border-radius: 4px;
+}
+
+.grid-content {
+  border-radius: 4px;
+  min-height: 36px;
+}
+
 .bottom-class {
   margin-top: 10px;
 }
-  .sel-count {
-    font-size: 12px;
-    margin-top: 7px;
-  }
+
+.sel-count {
+  font-size: 12px;
+  margin-top: 7px;
+}
+
 .pagination {
   .el-pagination {
     text-align: center;
 
-    }
   }
+}
 </style>
