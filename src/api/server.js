@@ -57,3 +57,13 @@ export function updateServer(params) {
     data: params
   })
 }
+
+
+// 获取serverIp列表
+export function getserverIP(params) {
+  return request({
+    url: '/server/getserverIP',
+    method: 'get',
+    params
+  })
+}
