@@ -87,6 +87,58 @@ export const constantRoutes = [
       }
     ]
   },
+  {
+    path: '/nested',
+    component: Layout,
+    // redirect: '/nested/serverman',
+    name: 'Nested',
+    meta: {
+      title: '服务管理',
+      icon: 'nested'
+    },
+    children: [
+      {
+        path: 'serverman',
+        component: () => import('@/views/nested/serverman/index'), // Parent router-view
+        name: 'Serverman',
+        meta: { title: '服务器相关操作' },
+        children: [
+          {
+            path: 'ipmicontrol',
+            component: () => import('@/views/nested/serverman/ipmicontrol/'),
+            name: 'Ipmicontrol',
+            meta: { title: '电源管理' }
+          },
+
+          {
+            path: 'systeminstall',
+            component: () => import('@/views/nested/serverman/systeminstall/'),
+            name: 'Systeminstall',
+            meta: { title: '系统重装' },
+            // children: [
+            //   {
+            //     path: 'menu1-2-1',
+            //     component: () => import('@/views/nested/menu1/menu1-2/menu1-2-1'),
+            //     name: 'Menu1-2-1',
+            //     meta: { title: 'Menu1-2-1' }
+            //   },
+            //   {
+            //     path: 'menu1-2-2',
+            //     component: () => import('@/views/nested/menu1/menu1-2/menu1-2-2'),
+            //     name: 'Menu1-2-2',
+            //     meta: { title: 'Menu1-2-2' }
+            //   }
+            // ]
+          }
+        ]
+      },
+      {
+        path: 'webterminal',
+        component: () => import('@/views/nested/webterminal/index'),
+        meta: { title: 'Web-Terminal' }
+      }
+    ]
+  },
   { path: '*', redirect: '/404', hidden: true }
 ]
 
@@ -95,64 +147,6 @@ export const constantRoutes = [
  * the routes that need to be dynamically loaded based on user roles
  */
 export const asyncRoutes = [
-  {
-    path: '/nested',
-    component: Layout,
-    redirect: '/nested/menu1',
-    name: 'Nested',
-    meta: {
-      title: '服务管理',
-      icon: 'nested'
-    },
-    children: [
-      {
-        path: 'menu1',
-        component: () => import('@/views/nested/menu1/index'), // Parent router-view
-        name: 'Menu1',
-        meta: { title: 'Menu1' },
-        children: [
-          {
-            path: 'menu1-1',
-            component: () => import('@/views/nested/menu1/menu1-1'),
-            name: 'Menu1-1',
-            meta: { title: 'Menu1-1' }
-          },
-          {
-            path: 'menu1-2',
-            component: () => import('@/views/nested/menu1/menu1-2'),
-            name: 'Menu1-2',
-            meta: { title: 'Menu1-2' },
-            children: [
-              {
-                path: 'menu1-2-1',
-                component: () => import('@/views/nested/menu1/menu1-2/menu1-2-1'),
-                name: 'Menu1-2-1',
-                meta: { title: 'Menu1-2-1' }
-              },
-              {
-                path: 'menu1-2-2',
-                component: () => import('@/views/nested/menu1/menu1-2/menu1-2-2'),
-                name: 'Menu1-2-2',
-                meta: { title: 'Menu1-2-2' }
-              }
-            ]
-          },
-          {
-            path: 'menu1-3',
-            component: () => import('@/views/nested/menu1/menu1-3'),
-            name: 'Menu1-3',
-            meta: { title: 'Menu1-3' }
-          }
-        ]
-      },
-      {
-        path: 'menu2',
-        component: () => import('@/views/nested/menu2/index'),
-        meta: { title: 'Web-Terminal' }
-      }
-    ]
-  },
-
   {
     path: 'external-link',
     component: Layout,

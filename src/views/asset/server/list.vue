@@ -75,7 +75,10 @@
         <template slot-scope="scope">
           <el-button size="mini" @click="serverEdit(scope.row)">编辑</el-button>
           <el-button size="mini" type="danger" @click="serverDelete(scope.row)">删除</el-button>
-          <el-button size="mini" type="danger" @click="serverInstall(scope.row)">重装系统</el-button>
+          <!-- <el-button size="mini" type="danger" >重装系统</el-button> -->
+          <el-button size="mini"  @click="navigateToPermissionsGroup">
+            重装系统
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -99,6 +102,9 @@ export default {
     }
   },
   methods: {
+    navigateToPermissionsGroup() {
+      this.$router.push('/nested/serverman/systeminstall');
+    },
     schange(val) {
       this.$emit('mulselect', val)
     },
