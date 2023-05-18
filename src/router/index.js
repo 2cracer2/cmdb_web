@@ -66,7 +66,7 @@ export const constantRoutes = [
     ]
   },
   {
-    path: '/perm',
+    path: '/permissions',
     component: Layout,
     meta: {
       title: '权限管理',
@@ -76,13 +76,13 @@ export const constantRoutes = [
       {
         path: 'user',
         name: 'Users',
-        component: () => import('@/views/perm/users/index'),
+        component: () => import('@/views/permissions/users/index'),
         meta: { title: '用户管理' }
       },
       {
         path: 'group',
         name: 'Groups',
-        component: () => import('@/views/perm/groups/index'),
+        component: () => import('@/views/permissions/groups/index'),
         meta: { title: '组管理' }
       }
     ]

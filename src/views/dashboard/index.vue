@@ -4,7 +4,7 @@
       <el-col :span="4" :offset="2">
         <el-card :body-style="{ padding: '0px' }" class="card-panel">
           <div class="card-panel-icon-wrapper icon-peoples">
-            <router-link to="/perm/group">
+            <router-link to="/permissions/group">
               <svg-icon icon-class="peoples" class-name="card-panel-icon" />
             </router-link>
           </div>
@@ -21,7 +21,7 @@
       <el-col :span="4" :offset="2">
         <el-card :body-style="{ padding: '0px' }" class="card-panel">
           <div class="card-panel-icon-wrapper icon-people">
-            <router-link to="/perm/user">
+            <router-link to="/permissions/user">
               <svg-icon icon-class="people" class-name="card-panel-icon" />
             </router-link>
           </div>
