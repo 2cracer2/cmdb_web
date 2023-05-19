@@ -41,7 +41,7 @@
         <el-drawer title="重装进度" :visible.sync="recordDrawerVisible" size="50%" :before-close="handleClose">
           <el-table :data="installingRecord">
             <el-table-column prop="reinstall_ip" label="重装IP"></el-table-column>
-            <el-table-column prop="uuid" label="UUID"></el-table-column>
+            <el-table-column prop="install_progress" label="UUID"></el-table-column>
             <el-table-column prop="system" label="操作系统" :formatter="row => systemMap[row.system]"></el-table-column>
             <el-table-column prop="installation_results" label="安装结果"
               :formatter="row => resultsMap[row.installation_results]"></el-table-column>
@@ -51,8 +51,12 @@
               </template></el-table-column>
             <el-table-column prop="server" label="服务器"></el-table-column>
           </el-table>
-          <div>sdfds
-            <h1>sd</h1>
+          <div>
+            <el-steps direction="vertical" :active="installingRecord.install_progress">
+              <el-step v-for="(step, index) in progressStatuses" :key="index" :title="step.description"
+                :status="step.color"></el-step>
+            </el-steps>
+
           </div>
         </el-drawer>
       </el-col>
@@ -101,6 +105,15 @@ export default {
         { label: 'CentOS 7.8', value: 1 },
         { label: 'Ubuntu 22.04', value: 2 }
       ],
+      progressStatuses: [
+        { description: '排序等待中', color: 'blue' },
+        { description: '[1/5]配置重装系统信息，以PXE重启进行安装', color: 'blue' },
+        { description: '[2/5]连接Cobblerg管理后台，获取DHCP分配地址', color: 'blue' },
+        { description: '[3/5]自动重装中，预计5分钟左右', color: 'blue' },
+        { description: '[4/5]配置业务口网络', color: 'blue' },
+        { description: '[5/5]配置强密码中', color: 'blue' },
+        { description: '流程结束', color: 'blue' },
+      ],
       systemMap: {
         0: 'CentOS 7.2',
         1: 'CentOS 7.8',
@@ -117,6 +130,11 @@ export default {
       installingRecord: [],
       timer: null,
       selectedServer: null
+    }
+  },
+  beforeDestroy() {
+    if (this.timer) {
+      clearInterval(this.timer);
     }
   },
   computed: {
@@ -151,16 +169,33 @@ export default {
       }
       this.recordDrawerVisible = true;
       this.selectedServer = row;
-      this. getRecordInstall();
-      if (row.status === 'installing') {
+      this.getRecordInstall();
+      // if (row.status === 'installing') {
         this.timer = setInterval(() => {
-          this. getRecordInstall();
+          this.getRecordInstall();
         }, 5000);  // Update every 5 seconds
-      }
+
     },
-    getRecordInstall(){
+    getRecordInstall() {
       getRecordInstalling({ server: this.selectedServer.id }).then(res => {
-        this.installingRecord= res.data.results;
+        // this.installingRecord = res.data.results;
+
+        this.installingRecord = res.data.results;
+        const progress = this.installingRecord[0].install_progress;
+        const resultType = this.installingRecord[0].installation_results;
+        console.log(progress)
+
+
+        this.progressStatuses.forEach((status, index) => {
+          if (index < progress) {
+            let newColor = (resultType === 1) ? 'blue' : (resultType === 2) ? 'green' : 'red';
+            this.$set(this.progressStatuses[index], 'color', newColor);
+          }
+        });
+        if (resultType !== 1) {  // installation completed or failed
+          this.closeDrawer();
+        }
+
       }).catch(err => {
         console.log(err);
         this.$message.error('获取重装进度失败！');
@@ -174,11 +209,18 @@ export default {
         this.$message.error('获取安装记录失败！');
       });
     },
+    closeDrawer() {
+      if (this.timer) {
+        clearInterval(this.timer);
+        this.timer = null;
+      }
+    },
     handleClose(done) {
       done();
       clearInterval(this.timer);
       this.timer = null;
       this.recordDrawerVisible = false;
+
     },
     selectServer(row) {
       let confirmText = '确定要选中此服务器吗?';
