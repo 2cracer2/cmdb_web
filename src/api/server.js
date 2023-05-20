@@ -67,3 +67,12 @@ export function getserverIP(params) {
     params
   })
 }
+
+// 进行自动安装
+export function serverAutoInstall(params) {
+  return request({
+    url: '/server/autoInstalling/',
+    method: 'post',
+    data: params
+  })
+}

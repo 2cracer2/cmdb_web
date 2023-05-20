@@ -52,11 +52,12 @@
             <el-table-column prop="server" label="服务器"></el-table-column>
           </el-table>
           <div>
-            <el-steps direction="vertical" :active="installingRecord.install_progress">
+          </div>
+          <div style="height: 400px;">
+            <el-steps direction="vertical" :active="activeStepIndex">
               <el-step v-for="(step, index) in progressStatuses" :key="index" :title="step.description"
-                :status="step.color"></el-step>
+                :status="step.status"></el-step>
             </el-steps>
-
           </div>
         </el-drawer>
       </el-col>
@@ -70,6 +71,12 @@
         <el-form-item label="重装系统配置IP">
           <el-input v-model="form.reinstall_ip" placeholder="请输入重装系统配置的IP"></el-input>
         </el-form-item>
+        <el-form-item label="重装系统主机" v-show="false">
+          <el-input v-model="form.server" placeholder="重装系统的主机id"></el-input>
+        </el-form-item>
+        <el-form-item label="重装系统主机状态" v-show="false">
+          <el-input v-model="form.status" placeholder="重装系统的主机id"></el-input>
+        </el-form-item>
         <el-form-item label="操作系统">
           <el-select v-model="form.system" placeholder="请选择操作系统">
             <el-option label="CentOS 7.2" :value="0"></el-option>
@@ -78,7 +85,7 @@
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleSubmit">提交</el-button>
+          <el-button type="primary" :disabled="!isFormComplete " @click="handleSubmit">提交</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -87,7 +94,7 @@
 
 <script>
 import { postInstall } from '@/api/server' // 请将这里替换为你的实际api接口
-import { getProgress } from '@/api/server' // 假设这是获取安装进度的API，你需要替换为实际的API
+import { serverAutoInstall } from '@/api/server'
 import moment from 'moment'
 import { getServerList } from '@/api/server'
 import { getRecordsList } from '@/api/records'
@@ -98,21 +105,25 @@ export default {
     return {
       form: {
         ip: '',
-        system: ''
+        system: '',
+        reinstall_ip: '',
+        server: '',
+        status: ''
       },
       options: [
         { label: 'CentOS 7.2', value: 0 },
         { label: 'CentOS 7.8', value: 1 },
         { label: 'Ubuntu 22.04', value: 2 }
       ],
+      activeStepIndex: 0,
       progressStatuses: [
-        { description: '排序等待中', color: 'blue' },
-        { description: '[1/5]配置重装系统信息，以PXE重启进行安装', color: 'blue' },
-        { description: '[2/5]连接Cobblerg管理后台，获取DHCP分配地址', color: 'blue' },
-        { description: '[3/5]自动重装中，预计5分钟左右', color: 'blue' },
-        { description: '[4/5]配置业务口网络', color: 'blue' },
-        { description: '[5/5]配置强密码中', color: 'blue' },
-        { description: '流程结束', color: 'blue' },
+        { description: '排序等待中' },
+        { description: '[1/5]配置重装系统信息，以PXE重启进行安装' },
+        { description: '[2/5]连接Cobblerg管理后台，获取DHCP分配地址' },
+        { description: '[3/5]自动重装中，预计5分钟左右' },
+        { description: '[4/5]配置业务口网络' },
+        { description: '[5/5]配置强密码中' },
+        { description: '流程结束' },
       ],
       systemMap: {
         0: 'CentOS 7.2',
@@ -138,6 +149,12 @@ export default {
     }
   },
   computed: {
+    isFormComplete() {
+      return this.form.ip && this.form.reinstall_ip && this.form.system != null;
+    },
+    isRunning() {
+      return this.form.status !== 'running';
+    },
     availableServers() {
       // 只显示状态为在线的服务器
       return this.serverList.filter(server => server.server_status === 'running' || server.server_status === 'installing');
@@ -171,9 +188,9 @@ export default {
       this.selectedServer = row;
       this.getRecordInstall();
       // if (row.status === 'installing') {
-        this.timer = setInterval(() => {
-          this.getRecordInstall();
-        }, 5000);  // Update every 5 seconds
+      this.timer = setInterval(() => {
+        this.getRecordInstall();
+      }, 2000);  // Update every 5 seconds
 
     },
     getRecordInstall() {
@@ -181,17 +198,26 @@ export default {
         // this.installingRecord = res.data.results;
 
         this.installingRecord = res.data.results;
+
         const progress = this.installingRecord[0].install_progress;
         const resultType = this.installingRecord[0].installation_results;
-        console.log(progress)
+        const installationText = this.installingRecord[0].installation_txt;
 
+        this.activeStepIndex = progress
+        this.progressStatuses[progress].description = installationText
 
-        this.progressStatuses.forEach((status, index) => {
-          if (index < progress) {
-            let newColor = (resultType === 1) ? 'blue' : (resultType === 2) ? 'green' : 'red';
-            this.$set(this.progressStatuses[index], 'color', newColor);
+        if (resultType === 1) { // installing
+          if (progress === 0) {
+            this.progressStatuses[progress].status = 'wait'
+          } else {
+            this.progressStatuses[progress].status = 'process'
           }
-        });
+        } else if (resultType === 2) { // successful
+          this.progressStatuses[progress].status = 'success'
+        } else if (resultType === 3) { // failed
+          this.progressStatuses[progress].status = 'error'
+        }
+
         if (resultType !== 1) {  // installation completed or failed
           this.closeDrawer();
         }
@@ -236,6 +262,8 @@ export default {
       }).then(() => {
         this.form.ip = row.ip_managemant;
         this.form.reinstall_ip = row.ip_managemant;
+        this.form.server = row.id
+        this.form.status = row.server_status
         // this.autoInstall(row.ip_managemant, this.form.system);
         getRecordsList({ server: row.id }).then(res => {
           this.installRecords = res.data.results;
@@ -251,13 +279,22 @@ export default {
       });
     },
     handleSubmit() {
+      if (!this.isFormComplete) {
+        this.$message.error("请填写完整的表单");
+        return;
+      }
+
+      if (this.isRunning) {
+        this.$message.error("系统正在进行重装，请勿重复点击");
+        return;
+      }
       // 在提交前进行确认
       this.$confirm('确定要重装此服务器吗？', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning',
       }).then(() => {
-        autoInstall(this.form).then(res => {
+        serverAutoInstall(this.form).then(res => {
           if (res.data.code === 200) {
             this.$message.success(res.data.message);
             // TODO: 更新服务器列表，显示安装进度
@@ -267,47 +304,47 @@ export default {
         });
       });
     },
-    openConfirmDialog(row) {
-      let confirmText = '确定要重装服务器吗?';
+    // openConfirmDialog(row) {
+    //   let confirmText = '确定要重装服务器xxxxx吗?';
 
-      if (row.asset.business_unit !== '资源池') {
-        confirmText = '您正在重装一个非资源池的服务器，这可能会影响到正常运行的服务，您确定要继续吗？';
-      }
+    //   if (row.asset.business_unit !== '资源池') {
+    //     confirmText = '您正在重装一个非资源池的服务器，这可能会影响到正常运行的服务，您确定要继续吗？';
+    //   }
 
-      this.$confirm(confirmText, '警告', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        // 在这里调用API进行实际的服务器重装操作
-        this.autoInstall(row.ip_managemant, this.form.system);
-      }).catch(() => {
-        this.$message({
-          type: 'info',
-          message: '已取消重装'
-        });
-      });
-    },
-    submitForm(formName) {
-      this.$refs[formName].validate(valid => {
-        if (valid) {
-          const { ip, system } = this.form;
-          // Use your api function here
-          serverAutoInstall({ ip, system }).then(res => {
-            if (res.code === 200) {
-              this.$message.success('安装成功！');
-            } else {
-              this.$message.error('安装失败！');
-            }
-          }).catch(err => {
-            console.log(err);
-            this.$message.error('请求发送失败！');
-          });
-        } else {
-          this.$message.error('请完善表单！');
-        }
-      });
-    },
+    //   this.$confirm(confirmText, '警告', {
+    //     confirmButtonText: '确定',
+    //     cancelButtonText: '取消',
+    //     type: 'warning'
+    //   }).then(() => {
+    //     // 在这里调用API进行实际的服务器重装操作
+    //     this.autoInstall(row.ip_managemant, this.form.system);
+    //   }).catch(() => {
+    //     this.$message({
+    //       type: 'info',
+    //       message: '已取消重装'
+    //     });
+    //   });
+    // },
+    // submitForm(formName) {
+    //   this.$refs[formName].validate(valid => {
+    //     if (valid) {
+    //       const { ip, system } = this.form;
+    //       // Use your api function here
+    //       serverAutoInstall({ ip, system }).then(res => {
+    //         if (res.code === 200) {
+    //           this.$message.success('安装成功！');
+    //         } else {
+    //           this.$message.error('安装失败！');
+    //         }
+    //       }).catch(err => {
+    //         console.log(err);
+    //         this.$message.error('请求发送失败！');
+    //       });
+    //     } else {
+    //       this.$message.error('请完善表单！');
+    //     }
+    //   });
+    // },
     fetchServerList() {
       // Use your api function to get server list here and assign it to serverList
       getServerList().then(res => {
