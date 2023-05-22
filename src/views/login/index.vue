@@ -39,7 +39,7 @@
       <div class="container">
         <div class="button-container">
           <div>
-          <el-button class="left-button" type="text" @click="addNewUser">管理员添加新用户</el-button>
+            <el-button class="left-button" type="text" @click="addNewUser">管理员添加新用户</el-button>
           </div>
           <div class="spacer"></div>
           <div>
@@ -49,7 +49,7 @@
       </div>
 
     </el-form>
-    <el-dialog title="用户组册" :visible.sync="dialogFormVisible">
+    <el-dialog title="用户注册" :visible.sync="dialogFormVisible">
       <el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
         <el-form-item label="用户名" prop="username">
           <el-input type="text" v-model="ruleForm.username" autocomplete="off"></el-input>
@@ -57,6 +57,10 @@
         <el-form-item label="邮箱" prop="email">
           <el-input type="text" v-model="ruleForm.email" autocomplete="off"></el-input>
         </el-form-item>
+        <el-form-item label="电话" prop="phone">
+          <el-input type="text" v-model="ruleForm.phone" autocomplete="off"></el-input>
+        </el-form-item>
+
         <el-form-item label="密码" prop="password">
           <el-input type="password" v-model="ruleForm.password" autocomplete="off"></el-input>
         </el-form-item>
@@ -82,6 +86,8 @@
 <script>
 import { validUsername } from "@/utils/validate";
 import { createUser } from "@/api/user";
+import { MessageBox } from 'element-ui';
+
 
 export default {
   name: "Login",
@@ -101,6 +107,14 @@ export default {
         if (this.ruleForm.checkPassword !== "") {
           this.$refs.ruleForm.validateField("checkPassword");
         }
+        callback();
+      }
+    };
+    var validatePhone = (rule, value, callback) => {
+      let temp = /^\d{10}$/;  // Adjust this regex to fit the phone number format you want
+      if (!temp.test(value)) {
+        callback(new Error("请输入正确的电话号码"));
+      } else {
         callback();
       }
     };
@@ -149,6 +163,7 @@ export default {
         email: "",
         password: "",
         checkPassword: "",
+        phone: "",
       },
       rules: {
         username: [
@@ -160,6 +175,9 @@ export default {
         ],
         checkPassword: [
           { required: true, validator: validatePass2, trigger: "blur" },
+        ],
+        phone: [
+          { required: true, validator: validatePhone, trigger: "blur" },
         ],
       },
       formLabelWidth: "120px",
@@ -227,6 +245,10 @@ export default {
           });
         } else {
           console.log("error submit!!");
+          MessageBox.alert('表单填写有误，请检查后再提交！', '警告', {
+            confirmButtonText: '确定',
+            type: 'warning'
+          });
           return false;
         }
       });
@@ -322,9 +344,10 @@ $light_gray: #eee;
   .right-button {
     margin-right: 10px;
   }
+
   .spacer {
-  flex-grow: 1;
-}
+    flex-grow: 1;
+  }
 
   .tips {
     font-size: 14px;

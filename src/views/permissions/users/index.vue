@@ -2,10 +2,10 @@
   <div class="user">
     <div class="header-class">
       <el-row :gutter="20">
-        <el-col :span="6"><div class="grid-content bg-purple">
+        <!-- <el-col :span="6"><div class="grid-content bg-purple">
           <el-button type="primary" size="mini" @click="dialogVisibleCreate = true">创建用户</el-button>
         </div>
-        </el-col>
+        </el-col> -->
         <el-col :span="8"><div class="grid-content bg-purple"></div></el-col>
         <el-col :span="6">
           <div class="grid-content bg-purple">
@@ -173,13 +173,17 @@ export default {
       this.groupList = []
       this.detailForm = value
       this.dialogVisibleGroup = true
-      getGroupList().then(
+      getGroupList(this.params).then(
         // 获取所有用户组列表
         res => {
-          this.groupOption = res.results
+          console.log("Group List Response:", res);
+          this.groupOption = res.data.results
         }
+
       )
+      console.log("Groups value:", value.groups); // 新添加的日志
       this.groupList = value.groups.map(item => item.id)
+      console.log(this.getGroupList)
     },
     handleDelete(id) {
       deleteUser(id).then(

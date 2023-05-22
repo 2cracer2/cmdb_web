@@ -1,29 +1,17 @@
 <template>
   <div class="userlist">
-    <el-table
-      v-loading="loading"
-      :data="values"
-      style="width: 100%">
-      <el-table-column
-        label="用户名"
-        min-width="150"
-      >
+    <el-table v-loading="loading" :data="values" style="width: 100%">
+      <el-table-column label="用户名" min-width="150">
         <template slot-scope="scope">
           <span>{{ scope.row.username }}</span>
         </template>
       </el-table-column>
-      <el-table-column
-        label="姓名"
-        min-width="150"
-      >
+      <el-table-column label="上次登录时间" min-width="150">
         <template slot-scope="scope">
-          <span>{{ scope.row.name }}</span>
+          <span>{{ formatDate(scope.row.last_login) }}</span>
         </template>
       </el-table-column>
-      <el-table-column
-        label="邮箱地址"
-        min-width="250"
-      >
+      <el-table-column label="邮箱地址" min-width="250">
         <template slot-scope="scope">
           <span>{{ scope.row.email }}</span>
         </template>
@@ -36,33 +24,20 @@
           <span>{{ scope.row.phone }}</span>
         </template>
       </el-table-column>
-      <el-table-column
-        label="用户组"
-        min-width="220"
-      >
+      <el-table-column label="用户组" min-width="220">
         <template slot-scope="scope">
-          <div v-for="(item, index) in scope.row.groups" :key="index" style="float:left">
+          <!-- <div v-for="(item, index) in scope.row.groups" :key="index" style="float:left">
             <el-tag style="margin-right: 3px" size="mini" >{{ item.name }}</el-tag>
-          </div>
+          </div> -->
+          <span>{{ getRoleName(scope.row.roles) }}</span>
         </template>
       </el-table-column>
       <el-table-column label="操作" min-width="300">
         <template slot-scope="scope">
-          <el-button
-            size="mini"
-            @click="userEdit(scope.row)">编辑</el-button>
-          <el-button
-            size="mini"
-            type="info"
-            @click="userGroups(scope.row)">属组</el-button>
-          <el-button
-            size="mini"
-            type="danger"
-            @click="userDelete(scope.row)">删除</el-button>
-          <el-button
-            size="mini"
-            type="warning"
-            @click="passEdit(scope.row)">修改密码</el-button>
+          <el-button size="mini" @click="userEdit(scope.row)">编辑</el-button>
+          <el-button size="mini" type="info" @click="userGroups(scope.row)">属组</el-button>
+          <el-button size="mini" type="danger" @click="userDelete(scope.row)">删除</el-button>
+          <el-button size="mini" type="warning" @click="passEdit(scope.row)">修改密码</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -70,12 +45,25 @@
 </template>
 
 <script>
+
+import moment from 'moment'
+
 export default {
+  data() {
+    return {
+      role_type: [
+        [0, 'admin'],
+        [1, 'user'],
+      ],
+      // 其他数据属性...
+    };
+  },
+
   name: 'UserList',
   props: {
     values: {
       type: Array,
-      default: function() {
+      default: function () {
         return []
       }
     },
@@ -85,6 +73,15 @@ export default {
     }
   },
   methods: {
+    getRoleName(roleId) {
+      const role = this.role_type.find(r => r[0] === roleId);
+      return role ? role[1] : 'Unknown role';
+    },
+    formatDate(value) {
+      if (value) {
+        return moment(String(value)).format('MM/DD/YYYY HH:mm');
+      }
+    },
     passEdit(user) {
       this.$emit('editPass', user)
     },
@@ -114,6 +111,4 @@ export default {
 
 </script>
 
-<style rel="stylesheet/scss" lang="scss" scoped>
-
-</style>
+<style rel="stylesheet/scss" lang="scss" scoped></style>
