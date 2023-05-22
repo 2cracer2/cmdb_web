@@ -191,7 +191,8 @@ export default {
         const serverChart = echarts.init(document.getElementById('server-chart'));
         const option = {
           title: {
-            text: '服务器内存容量'
+            text: '服务器内存容量',
+            left: 'center'
           },
           tooltip: {},
           xAxis: {
