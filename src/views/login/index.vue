@@ -111,7 +111,7 @@ export default {
       }
     };
     var validatePhone = (rule, value, callback) => {
-      let temp = /^\d{10}$/;  // Adjust this regex to fit the phone number format you want
+      let temp = /^\d{11}$/;  // Adjust this regex to fit the phone number format you want
       if (!temp.test(value)) {
         callback(new Error("请输入正确的电话号码"));
       } else {
