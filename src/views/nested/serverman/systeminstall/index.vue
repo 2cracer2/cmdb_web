@@ -85,7 +85,7 @@
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" :disabled="!isFormComplete " @click="handleSubmit">提交</el-button>
+          <el-button type="primary" :disabled="!isFormComplete" @click="handleSubmit">提交</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -103,12 +103,14 @@ import { getRecordInstalling } from '@/api/records'
 export default {
   data() {
     return {
+      isRunning: false, 
       form: {
         ip: '',
         system: '',
         reinstall_ip: '',
         server: '',
-        status: ''
+        status: '',
+        uuid: ''
       },
       options: [
         { label: 'CentOS 7.2', value: 0 },
@@ -171,6 +173,10 @@ export default {
 
   },
   methods: {
+    refreshData() {
+      // 在这里执行刷新数据的代码
+      this.availableServers()
+    },
     formatDate(value) {
       if (value) {
         return moment(String(value)).format('MM/DD/YYYY HH:mm');
@@ -264,6 +270,7 @@ export default {
         this.form.reinstall_ip = row.ip_managemant;
         this.form.server = row.id
         this.form.status = row.server_status
+        this.form.uuid = this.$store.getters.user;
         // this.autoInstall(row.ip_managemant, this.form.system);
         getRecordsList({ server: row.id }).then(res => {
           this.installRecords = res.data.results;
@@ -288,6 +295,7 @@ export default {
         this.$message.error("系统正在进行重装，请勿重复点击");
         return;
       }
+      this.isRunning = true;
       // 在提交前进行确认
       this.$confirm('确定要重装此服务器吗？', '提示', {
         confirmButtonText: '确定',
@@ -297,9 +305,10 @@ export default {
         serverAutoInstall(this.form).then(res => {
           if (res.data.code === 200) {
             this.$message.success(res.data.message);
-            // TODO: 更新服务器列表，显示安装进度
+            
           } else {
             this.$message.error(res.data.message);
+            this.isRunning = false;
           }
         });
       });
