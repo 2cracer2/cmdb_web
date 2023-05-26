@@ -66,6 +66,23 @@ export const constantRoutes = [
     ]
   },
   {
+    path: '/device',
+    component: Layout,
+    name: 'Device',
+    meta: {
+      title: '设备管理',
+      icon: 'tree'
+    },
+    children: [
+      {
+        path: 'alldevice',
+        name: 'AllDevice',
+        component: () => import('@/views/device/index'),
+        meta: { title: '设备' }
+      }
+    ]
+  },
+  {
     path: '/permissions',
     component: Layout,
     meta: {

@@ -4,10 +4,13 @@
       <el-form-item label="管理IP" prop="ip_managemant">
         <el-input v-model="form.ip_managemant" placeholder="请输入管理IP"></el-input>
       </el-form-item>
-      <el-form-item label="备注" prop="remark">
-        <el-input v-model="form.remark" placeholder="请输入备注"></el-input>
+      <el-form-item label="RAID" prop="raid_type">
+        <el-input v-model="form.raid_type" placeholder="请输入RAID"></el-input>
       </el-form-item>
-      <el-form-item label="供应商" prop="supplier">
+      <el-form-item label="hostname" prop="hostname">
+        <el-input v-model="form.hostname" placeholder="请输入hostname"></el-input>
+      </el-form-item>
+      <!-- <el-form-item label="hostname" prop="hostname">
         <el-select
           v-model="form.supplier"
           placeholder="请选择供应商"
@@ -57,7 +60,7 @@
             </el-col>
           </el-row>
         </div>
-      </el-form-item>
+      </el-form-item> -->
       <el-form-item label="进场/过保日期">
         <el-row>
           <el-col :span="11">

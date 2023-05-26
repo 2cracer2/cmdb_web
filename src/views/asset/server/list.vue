@@ -6,6 +6,21 @@
       <el-table-column type="expand">
         <template slot-scope="props">
           <el-form label-position="left" inline class="demo-table-expand">
+            <el-form-item label="服务器类型">
+              <span>{{ getSubAssetType(props.row.sub_asset_type) }}</span>
+            </el-form-item>
+            <el-form-item label="RAID类型">
+              <span>{{ props.row.raid_type }}</span>
+            </el-form-item>
+            <el-form-item label="业务段">
+              <span>{{ props.row.asset.business_unit }}</span>
+            </el-form-item>
+            <el-form-item label="负责人">
+              <span>{{ props.row.asset.admin }}</span>
+            </el-form-item>
+            <el-form-item label="所属机房">
+              <span>{{ props.row.asset.idc }}</span>
+            </el-form-item>
             <el-form-item label="CPU型号">
               <span>{{ props.row.cpu_model }}</span>
             </el-form-item>
@@ -28,19 +43,35 @@
             </el-form-item>
 
             <el-form-item label="硬盘">
-              <el-popover placement="right-start" width="200" trigger="hover">
+              <el-popover placement="right-start" width="400" trigger="hover">
                 <el-table :data="props.row.driver">
-                  <el-table-column width="80" property="driver_name" label="设备名"></el-table-column>
-                  <el-table-column width="80" property="capacity" label="硬盘大小"></el-table-column>
+                  <el-table-column property="driver_name" label="设备名"></el-table-column>
+                  <el-table-column property="interface_type" label="接口类型"></el-table-column>
+                  <el-table-column property="capacity" label="硬盘大小"></el-table-column>
                 </el-table>
                 <el-button slot="reference" type="text">{{ props.row.driver.length }}</el-button>
               </el-popover>
             </el-form-item>
-            <el-form-item label="创建时间">
-              <span>{{ props.row.create_date }}</span>
+
+            <el-form-item label="网卡">
+              <el-popover placement="right-start" width="400" trigger="hover">
+                <el-table :data="props.row.nic">
+                  <el-table-column property="mac_address" label="mac地址"></el-table-column>
+                  <el-table-column property="model" label="网卡型号"></el-table-column>
+                  <el-table-column property="ip_addr" label="ip地址"></el-table-column>
+                  <el-table-column property="netmask" label="子网掩码"></el-table-column>
+                </el-table>
+                <el-button slot="reference" type="text">{{ props.row.driver.length }}</el-button>
+              </el-popover>
             </el-form-item>
-            <el-form-item label="更新时间">
-              <span>{{ props.row.update_date }}</span>
+
+
+
+            <el-form-item label="购买日期">
+              <span>{{ props.row.asset.purchase_day }}</span>
+            </el-form-item>
+            <el-form-item label="过保日期">
+              <span>{{ props.row.asset.expire_day }}</span>
             </el-form-item>
           </el-form>
         </template>
@@ -76,7 +107,7 @@
           <el-button size="mini" @click="serverEdit(scope.row)">编辑</el-button>
           <el-button size="mini" type="danger" @click="serverDelete(scope.row)">删除</el-button>
           <!-- <el-button size="mini" type="danger" >重装系统</el-button> -->
-          <el-button size="mini"  @click="navigateToPermissionsGroup">
+          <el-button size="mini" @click="navigateToPermissionsGroup">
             重装系统
           </el-button>
         </template>
@@ -102,6 +133,15 @@ export default {
     }
   },
   methods: {
+    getSubAssetType(type) {
+      const types = {
+        0: 'PC服务器',
+        1: '刀片机',
+        2: '小型机'
+      };
+
+      return types[type] || 'Unknown';
+    },
     navigateToPermissionsGroup() {
       this.$router.push('/nested/serverman/systeminstall');
     },

@@ -2,9 +2,9 @@
   <div class="server">
     <el-row :gutter="20">
       <el-col :span="3" :offset="1">
-        <div class="grid-content bg-purple">
+        <!-- <div class="grid-content bg-purple">
           <el-button type="primary" size="small" @click="handleDialogCreate">新增服务器</el-button>
-        </div>
+        </div> -->
       </el-col>
       <el-col :span="3">
         <div class="grid-content bg-purple">

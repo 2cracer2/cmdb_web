@@ -76,3 +76,12 @@ export function serverAutoInstall(params) {
     data: params
   })
 }
+
+// 获取
+export function getAssetList(params) {
+  return request({
+    url: '/asset/',
+    method: 'get',
+    params
+  })
+}
