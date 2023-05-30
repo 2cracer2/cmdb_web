@@ -32,10 +32,10 @@
           <a target="_blank" href="http://localhost:8000/admin">
             <el-dropdown-item>Django后台</el-dropdown-item>
           </a>
-          <a target="_blank" href="https://github.com/PanJiaChen/vue-admin-template/">
+          <!-- <a target="_blank" href="https://github.com/PanJiaChen/vue-admin-template/">
             <el-dropdown-item>Github</el-dropdown-item>
-          </a>
-          <a target="_blank" href="http://localhost:8000/api">
+          </a> -->
+          <a target="_blank" href="http://localhost:8000/docs/">
             <el-dropdown-item>APi文档</el-dropdown-item>
           </a>
           <el-dropdown-item divided @click.native="logout">

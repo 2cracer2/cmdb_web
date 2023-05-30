@@ -118,6 +118,7 @@ export default {
       this.socket.onmessage = e => {
         const reader = new window.FileReader()
         reader.onload = () => this.term.write(reader.result)
+        //处理字节序列的数据
         reader.readAsText(e.data, 'utf-8')
       }
       this.socket.onopen = () => {

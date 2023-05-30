@@ -61,7 +61,7 @@
                   <el-table-column property="ip_addr" label="ip地址"></el-table-column>
                   <el-table-column property="netmask" label="子网掩码"></el-table-column>
                 </el-table>
-                <el-button slot="reference" type="text">{{ props.row.driver.length }}</el-button>
+                <el-button slot="reference" type="text">{{ props.row.nic.length }}</el-button>
               </el-popover>
             </el-form-item>
 
