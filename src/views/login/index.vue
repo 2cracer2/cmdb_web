@@ -233,7 +233,7 @@ export default {
             console.log(response);
             if (response.status == 201) {
               this.$message({
-                message: "用户创建成功，请登录邮箱，激活用户。",
+                message: "用户创建成功",
                 type: "success",
               });
             } else {
